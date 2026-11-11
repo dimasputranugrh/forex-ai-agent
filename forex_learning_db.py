@@ -268,6 +268,13 @@ def get_recap_summary() -> dict:
     total_pips = row["total_pips"] or 0.0
     win_rate = (wins / total * 100.0) if total > 0 else 0.0
     net_usd = total_pips * 0.10
+    # Simulasi Akun Cent (Modal $10 USD = 1,000 USC)
+    # Lot 0.01 Cent: 1 pip = 0.1 USC = $0.001 USD
+    initial_cent_bal = 1000.0  # 1,000 USC = $10 USD
+    pnl_cent = total_pips * 0.10  # 1 pip = 0.10 cent
+    cur_cent_bal = initial_cent_bal + pnl_cent
+    pnl_cent_usd = pnl_cent / 100.0  # konversi ke USD riil
+    cur_cent_usd = cur_cent_bal / 100.0
 
     pending_rows = conn.execute("""
         SELECT id, symbol, action, method, entry_price, take_profit, stop_loss, timestamp
@@ -284,5 +291,15 @@ def get_recap_summary() -> dict:
         "win_rate": round(win_rate, 1),
         "total_pips": round(total_pips, 1),
         "net_usd": round(net_usd, 2),
+        "cent": {
+            "initial_usc": initial_cent_bal,
+            "cur_usc": round(cur_cent_bal, 1),
+            "pnl_usc": round(pnl_cent, 1),
+            "initial_usd": 10.0,
+            "cur_usd": round(cur_cent_usd, 2),
+            "pnl_usd": round(pnl_cent_usd, 2),
+            "cur_idr": round(cur_cent_usd * 16000),
+            "pnl_idr": round(pnl_cent_usd * 16000),
+        },
         "pending": [dict(p) for p in pending_rows]
     }

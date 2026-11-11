@@ -537,19 +537,26 @@ def poll_telegram_commands(last_update_id: int, active_symbol: str) -> tuple[int
                 send_telegram(reply, sender_id)
             elif text in ["/recap", "recap", "/porto", "porto", "rekap"]:
                 rec = get_recap_summary()
-                sign = "+" if rec["net_usd"] >= 0 else ""
-                rp = rec["net_usd"] * 16000  # Estimasi kurs IDR
+                c = rec["cent"]
+                sign_c = "+" if c["pnl_usd"] >= 0 else ""
                 pending_txt = f"{len(rec['pending'])} posisi" if rec['pending'] else "Tidak ada"
                 recap_msg = (
-                    "📊 [REKAP HASIL TRADING AI - 0.01 LOT]\n\n"
-                    f"🎯 Total Selesai: {rec['total']} Order\n"
-                    f"✅ Menang (Take Profit): {rec['wins']}\n"
-                    f"❌ Kalah (Stop Loss): {rec['losses']}\n"
+                    "📊 [REKAP HASIL TRADING AI - DUA SKENARIO]\n\n"
+                    f"🎯 Total Order Selesai: {rec['total']}\n"
+                    f"✅ Menang (TP): {rec['wins']} | ❌ Kalah (SL): {rec['losses']}\n"
                     f"📈 Win Rate: {rec['win_rate']}%\n"
                     f"🪙 Akumulasi Pips: {rec['total_pips']:+.1f} Pips\n"
-                    f"💵 Net PnL (0.01 Lot): {sign}${rec['net_usd']:.2f} USD (~Rp {rp:,.0f})\n"
                     f"⏳ Posisi Aktif: {pending_txt}\n\n"
-                    "Setiap sinyal yang muncul otomatis masuk simulasi beli 0.01 lot dan dihitung untung/ruginya."
+                    "━━━━━━━━━━━━━━━━━━━━━\n"
+                    "🪙 *SKENARIO 1: MODAL KECIL $10 (AKUN CENT)*\n"
+                    f"• Modal Awal: 1,000 USC ($10.00 / ~Rp 160.000)\n"
+                    f"• Saldo Sekarang: {c['cur_usc']:,.1f} USC (${c['cur_usd']:.2f})\n"
+                    f"• Net PnL (0.01 Cent): {sign_c}${c['pnl_usd']:.2f} USD ({sign_c}Rp {c['pnl_idr']:,})\n"
+                    f"• Ketahanan: Kuat tahan puluhan SL berturut-turut.\n\n"
+                    "💵 *SKENARIO 2: AKUN STANDAR ($100 - $1,000)*\n"
+                    f"• Net PnL (0.01 Standard): {'+' if rec['net_usd']>=0 else ''}${rec['net_usd']:.2f} USD (~Rp {rec['net_usd']*16000:,.0f})\n"
+                    "━━━━━━━━━━━━━━━━━━━━━\n"
+                    "💡 *Catatan:* Akun Cent memungkinkan modal $10 bernapas lega tanpa risiko margin call!"
                 )
                 send_telegram(recap_msg, sender_id)
             elif text in ["/status", "/analisa", "status", "analisa", "cek"]:
