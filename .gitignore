@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+forex_agent.log
+forex_memory.db
+.venv/
